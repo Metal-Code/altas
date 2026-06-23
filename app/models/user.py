@@ -13,3 +13,5 @@ class User(Base):
     name: Mapped[str] = mapped_column(String(255))
     dob: Mapped[date] = mapped_column(Date)
     avatar_url: Mapped[str | None] = mapped_column(String(1000), default=None)
+    gender : Mapped[str] = mapped_column(String(15))
+    location : Mapped[str] = mapped_column(String(50))

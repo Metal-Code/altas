@@ -8,6 +8,8 @@ class UserCreate(BaseModel):
     password : str
     avatar : Optional[str] = None
     dob : date
+    location : str
+    gender : str
 
 class UserLogin(BaseModel):
     email : EmailStr
@@ -20,5 +22,7 @@ class UserResponse(BaseModel):
     dob : date
     phone_number : Optional[str] = None
     avatar_url : Optional[str] = None
+    location : str
+    gender : str
     model_config = ConfigDict(from_attributes=True)
 
