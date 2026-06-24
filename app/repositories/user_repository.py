@@ -13,7 +13,7 @@ async def get_user_by_id(db : AsyncSession, id : int) -> User | None:
     result = await db.execute(select(User).where(User.id == id))
     return result.scalar_one_or_none()
 
-async def create_user(db: AsyncSession, name: str, email: str, hashed_password: str, dob: date, location: str, gender: str, phone_number: str | None = None, avatar_url: str | None = None) -> User:
+async def create_user(db: AsyncSession, name: str, email: str, hashed_password: str, dob: date, location: str, gender: str, phone_number: str, avatar_url: str | None = None) -> User:
     user = User(name=name, email=email, hashed_password=hashed_password, dob=dob, location=location, gender=gender, phone_number=phone_number, avatar_url=avatar_url)
     db.add(user)
     await db.commit()

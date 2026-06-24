@@ -20,7 +20,7 @@ class UserResponse(BaseModel):
     name : str
     email : EmailStr
     dob : date
-    phone_number : Optional[str] = None
+    phone_number : str
     avatar_url : Optional[str] = None
     location : str
     gender : str
