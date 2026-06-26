@@ -10,6 +10,7 @@ class UserCreate(BaseModel):
     dob : date
     location : str
     gender : str
+    phone_number : str
 
 class UserLogin(BaseModel):
     email : EmailStr
@@ -26,3 +27,14 @@ class UserResponse(BaseModel):
     gender : str
     model_config = ConfigDict(from_attributes=True)
 
+class VerifyOTP(BaseModel):
+    email : EmailStr
+    otp : str
+
+class ForgotPassword(BaseModel):
+    email : EmailStr
+
+class ResetPassword(BaseModel):
+    email : EmailStr
+    otp : str
+    new_password : str

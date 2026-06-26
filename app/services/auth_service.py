@@ -12,6 +12,7 @@ from app.core.security import hash_password, verify_password, create_access_toke
 from datetime import datetime, date, timedelta, timezone
 from app.models.pending_registration import PendingRegistration
 from datetime import date, datetime, timezone
+from app.services.otp_service import send_otp_email, send_otp_sms
 import random
 
 def generate_otp():
@@ -29,7 +30,8 @@ async def register_user(db : AsyncSession, user_data : UserCreate):
     existing_pending_user = await get_pending_by_email(db, user_data.email)
     if existing_pending_user:
         await update_otp(db, existing_pending_user, new_otp=otp, new_expires_at=otp_expires_at)
-        print(otp)
+        await send_otp_email(user_data.email, otp)
+        await send_otp_sms(user_data.phone_number, otp)
         return {
             "message" : "OTP sent to your email"
         }
@@ -47,7 +49,8 @@ async def register_user(db : AsyncSession, user_data : UserCreate):
         avatar_url=user_data.avatar
     )
 
-    print(otp)
+    await send_otp_email(user_data.email, otp)
+    await send_otp_sms(user_data.phone_number, otp)
     return {"message": "OTP sent to your email"}
 
 
@@ -129,7 +132,8 @@ async def forgot_password(db : AsyncSession, email : str):
             expires_at=otp_expires_at,
             avatar_url=user.avatar_url
         )
-    print(otp)
+    await send_otp_email(user.email, otp)
+    await send_otp_sms(user.phone_number, otp)
     return {
         "message" : "OTP sent to verify and change password"
     }
