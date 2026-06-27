@@ -7,17 +7,17 @@ from app.core.database import get_db
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
 @router.post("/register")
-async def register(user_data : UserCreate,db : AsyncSession = Depends(get_db)):
+async def register_router(user_data : UserCreate,db : AsyncSession = Depends(get_db)):
      return await register_user(db, user_data)
     
 
 @router.post("/verify-otp")
-async def verify(data : VerifyOTP, db : AsyncSession = Depends(get_db)):
+async def verify_router(data : VerifyOTP, db : AsyncSession = Depends(get_db)):
         return await verify_otp(db, data.email, data.otp)
 
 
 @router.post("/login")
-async def login(user_data : UserLogin, db : AsyncSession = Depends(get_db)):
+async def login_router(user_data : UserLogin, db : AsyncSession = Depends(get_db)):
         return await login_user(db, user_data.email, user_data.password)
 
 @router.post("/forgot-password")

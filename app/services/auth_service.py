@@ -11,7 +11,7 @@ from app.core.config import settings
 from app.core.security import hash_password, verify_password, create_access_token, create_refresh_token
 from datetime import datetime, date, timedelta, timezone
 from app.models.pending_registration import PendingRegistration
-from datetime import date, datetime, timezone
+from datetime import datetime, date, timedelta
 from app.services.otp_service import send_otp_email, send_otp_sms
 import random
 
@@ -24,7 +24,7 @@ async def register_user(db : AsyncSession, user_data : UserCreate):
         raise HTTPException(status_code=400, detail="Email already registered")
     
     otp = generate_otp()
-    otp_expires_at = datetime.now(timezone.utc) + timedelta(seconds=settings.OTP_EXPIRY_SECONDS)
+    otp_expires_at = datetime.utcnow() + timedelta(seconds=settings.OTP_EXPIRY_SECONDS)
     hashed_pwd = hash_password(user_data.password)
 
     existing_pending_user = await get_pending_by_email(db, user_data.email)
@@ -59,7 +59,7 @@ async def verify_otp(db : AsyncSession, email : str, otp_code : str):
     if not pending:
         raise HTTPException(status_code=400, detail="User not registered yet")
     
-    if datetime.now(timezone.utc) > pending.expires_at:
+    if datetime.utcnow() > pending.expires_at:
         raise HTTPException(status_code=400, detail="OTP has expired")
     
     if otp_code != pending.otp:
@@ -98,7 +98,8 @@ async def login_user(db : AsyncSession, email : str, password : str):
     db_refresh_token = RefreshToken(
         user_id = existing_user.id,
         token = refresh_token,
-        expires_at = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+        expires_at = datetime.utcnow() + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
+        revoked=False
     )
     db.add(db_refresh_token)
     await db.commit()
@@ -113,7 +114,7 @@ async def forgot_password(db : AsyncSession, email : str):
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
     otp = generate_otp()
-    otp_expires_at = datetime.now(timezone.utc) + timedelta(seconds=settings.OTP_EXPIRY_SECONDS)
+    otp_expires_at = datetime.utcnow() + timedelta(seconds=settings.OTP_EXPIRY_SECONDS)
 
     pending_user = await get_pending_by_email(db, email)
     if pending_user:
@@ -143,7 +144,7 @@ async def reset_password(db : AsyncSession, email : str, otp_code : str, new_pas
     if not pending:
         raise HTTPException(status_code=400, detail="something went wrong")
     
-    if datetime.now(timezone.utc) > pending.expires_at:
+    if datetime.utcnow() > pending.expires_at:
         raise HTTPException(status_code=400, detail="OTP has expired")
 
     if otp_code != pending.otp:
