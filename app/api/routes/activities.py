@@ -1,0 +1,33 @@
+from fastapi import Depends, APIRouter
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.services.activity_service import create_activity_service, update_activity_service, delete_activity_service, get_activities_service, get_activity_service
+from app.schemas.activity import ActivityCreate, ActivityResponse, ActivityUpdate
+from app.models.user import User
+from app.core.database import get_db
+from app.api.deps import get_current_user
+
+router = APIRouter(prefix="/activity", tags=["Activity"])
+
+@router.post("/")
+async def create_activity(activity_data : ActivityCreate, current_user : User = Depends(get_current_user), db : AsyncSession = Depends(get_db)):
+    return await create_activity_service(db, activity_data, current_user)
+
+
+@router.get("/")
+async def get_activities(location : str | None = None, db : AsyncSession = Depends(get_db)):
+    return await get_activities_service(db, location)
+
+
+@router.delete("/{activity_id}")
+async def delete_activity(activity_id : int, current_user : User = Depends(get_current_user), db : AsyncSession = Depends(get_db)):
+    return await delete_activity_service(db, activity_id, current_user)
+
+
+@router.get("/{activity_id}")
+async def get_activity(activity_id : int, db : AsyncSession = Depends(get_db)):
+    return await get_activity_service(db, activity_id)
+
+
+@router.patch("/{activity_id}")
+async def update_activity(activity_id : int, activity_data : ActivityUpdate, current_user : User = Depends(get_current_user), db : AsyncSession = Depends(get_db)):
+    return await update_activity_service(db, activity_id, activity_data, current_user)
