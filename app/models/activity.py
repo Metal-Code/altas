@@ -9,7 +9,7 @@ class Activity(Base):
     id : Mapped[int] = mapped_column(primary_key=True)
     creator_id : Mapped[int] = mapped_column(ForeignKey("users.id"))
     title : Mapped[str] = mapped_column(String(100), nullable=False)
-    description : Mapped[str | None] = mapped_column(String(255), nullable=True)
+    description : Mapped[str | None] = mapped_column(String(800), nullable=True)
     location : Mapped[str] = mapped_column(String(100), nullable=False)
     date_time : Mapped[datetime] = mapped_column()
     max_participants : Mapped[int | None] = mapped_column()
