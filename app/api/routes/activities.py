@@ -4,23 +4,25 @@ from app.services.activity_service import create_activity_service, update_activi
 from app.schemas.activity import ActivityCreate, ActivityResponse, ActivityUpdate
 from app.services.participant_service import join_activity_service, leave_activity_service, get_participants_service, remove_participant_service
 from app.models.user import User
+from app.schemas.participant import ParticipantCreate, ParticipantResponse
+from app.models.participant import Participant
 from app.core.database import get_db
 from app.api.deps import get_current_user
 
 router = APIRouter(prefix="/activity", tags=["Activity"])
 
-@router.post("/")
+@router.post("/", response_model=ActivityResponse)
 async def create_activity(activity_data : ActivityCreate, current_user : User = Depends(get_current_user), db : AsyncSession = Depends(get_db)):
     return await create_activity_service(db, activity_data, current_user)
 
 
-@router.get("/")
+@router.get("/", response_model=list[ActivityResponse])
 async def get_activities(location : str | None = None, db : AsyncSession = Depends(get_db)):
     return await get_activities_service(db, location)
 
 
-@router.post("/{activity_id}/join")
-async def join_activity(activity_id : int, current_user : User = Depends(get_current_user), db : AsyncSession = Depends(get_db)):
+@router.post("/{activity_id}/join", response_model=ParticipantResponse)
+async def join_activity(activity_id : int, current_user : User = Depends(get_current_user), db : AsyncSession = Depends(get_db)) -> Participant:
     return await join_activity_service(db, activity_id, current_user)
 
 
@@ -29,7 +31,7 @@ async def leave_participants(activity_id : int, current_user : User = Depends(ge
     return await leave_activity_service(db, activity_id, current_user)
 
 
-@router.get("/{activity_id}/get-participants")
+@router.get("/{activity_id}/get-participants", response_model=list[ParticipantResponse])
 async def show_participants(activity_id : int, db : AsyncSession = Depends(get_db)):
     return await get_participants_service(db, activity_id)
 
@@ -39,12 +41,12 @@ async def remove_participant(activity_id : int, user_id : int, current_user : Us
     return await remove_participant_service(db, activity_id, user_id, current_user)
 
 
-@router.get("/{activity_id}")
+@router.get("/{activity_id}", response_model=ActivityResponse)
 async def get_activity(activity_id : int, db : AsyncSession = Depends(get_db)):
     return await get_activity_service(db, activity_id)
 
 
-@router.patch("/{activity_id}")
+@router.patch("/{activity_id}", response_model=ActivityResponse)
 async def update_activity(activity_id : int, activity_data : ActivityUpdate, current_user : User = Depends(get_current_user), db : AsyncSession = Depends(get_db)):
     return await update_activity_service(db, activity_id, activity_data, current_user)
 
