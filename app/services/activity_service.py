@@ -20,7 +20,7 @@ async def create_activity_service(db : AsyncSession, activity_data : ActivityCre
         creator_id=current_user.id,
         title = activity_data.title,
         location=activity_data.location,
-        date_time=activity_data.date_time,
+        date_time=activity_data.date_time.replace(tzinfo=None),
         description=activity_data.description,
         max_participants=activity_data.max_participants,
         category=activity_data.category

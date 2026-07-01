@@ -7,6 +7,11 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     REFRESH_TOKEN_EXPIRE_DAYS : int 
     OTP_EXPIRY_SECONDS : int = 180
+    mail_username: str
+    mail_password: str
+    mail_from: str
+    mail_port: int
+    mail_server: str
 
     model_config = SettingsConfigDict(env_file=".env")
 
