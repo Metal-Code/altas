@@ -4,6 +4,7 @@ from datetime import datetime, date
 from app.models.activity import Activity
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.schemas.activity import ActivityUpdate
+import uuid
 
 async def get_activity_by_id(db : AsyncSession, id : int) -> Activity | None:
     result = await db.execute(select(Activity).where(Activity.id == id))

@@ -1,7 +1,7 @@
 from fastapi import HTTPException, Depends, APIRouter, Request
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.services.auth_service import register_user, verify_otp, login_user, forgot_password, reset_password
-from app.schemas.user import UserCreate, UserLogin, UserResponse, VerifyOTP, ForgotPassword, ResetPassword, TokenResponse
+from app.services.auth_service import register_user, verify_otp, login_user, forgot_password, reset_password, refresh_access_token_service
+from app.schemas.user import UserCreate, UserLogin, UserResponse, VerifyOTP, ForgotPassword, ResetPassword, TokenResponse, RefreshTokenRequest
 from app.core.database import get_db
 from app.core.limiter import limiter
 import uuid
@@ -36,3 +36,7 @@ async def forgot_password_router(request : Request, data : ForgotPassword, db : 
 @limiter.limit("2/hour")
 async def reset_password_router(request : Request, data : ResetPassword, db : AsyncSession = Depends(get_db)):
        return await reset_password(db, data.email, data.otp, data.new_password)
+
+@router.post("/refresh")
+async def refresh_router(data: RefreshTokenRequest, db: AsyncSession = Depends(get_db)):
+    return await refresh_access_token_service(db, data.refresh_token)

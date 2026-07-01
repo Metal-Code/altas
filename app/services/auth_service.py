@@ -1,19 +1,21 @@
 from fastapi import HTTPException
 from app.core.database import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.schemas.user import UserCreate, UserLogin
+from app.schemas.user import UserCreate, UserLogin, RefreshToken
 from app.repositories.user_repository import get_user_by_email, get_user_by_id, create_user
 from app.repositories.pending_registration_repository import create_pending_registration, delete_pending, update_otp, get_pending_by_email
 from app.models.user import User
 from app.models.refresh_token import RefreshToken
 from sqlalchemy import select
 from app.core.config import settings
-from app.core.security import hash_password, verify_password, create_access_token, create_refresh_token
+from app.core.security import hash_password, verify_password, create_access_token, create_refresh_token, decode_token
 from datetime import datetime, date, timedelta, timezone
 from app.models.pending_registration import PendingRegistration
 from datetime import datetime, date, timedelta
 from app.services.otp_service import send_otp_email, send_otp_sms
 import random
+from app.repositories.refresh_token_repository import get_refresh_token_repo
+from jose import jwt, JWTError
 
 def generate_otp():
     return str(random.randint(100000, 999999))
@@ -157,4 +159,36 @@ async def reset_password(db : AsyncSession, email : str, otp_code : str, new_pas
     await delete_pending(db, pending)
     return {
         "message" : "Password reset successfully"
+    }
+
+async def refresh_access_token_service(db : AsyncSession, refresh_token : str):
+    try:
+        payload = decode_token(refresh_token)
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+    
+    if payload.get("type") != "refresh":
+        raise HTTPException(status_code=401, detail="Invalid token")
+    
+    user_id = payload.get("sub")
+    if user_id is None:
+        raise HTTPException(status_code=401, detail="Invalid Token")
+    
+    db_token = await get_refresh_token_repo(db, refresh_token)
+    if not db_token:
+        raise HTTPException(status_code=401, detail="Token not found")
+    
+    if db_token.revoked:
+        raise HTTPException(status_code=401, detail="Token has been revoked")
+    
+    if datetime.utcnow() > db_token.expires_at:
+        raise HTTPException(status_code=401, detail="Token has been expired")
+    
+    new_access_token = create_access_token(data={
+        "sub" : str(user_id)
+    })
+
+    return {
+        "access_token" : new_access_token,
+        "token_type" : "bearer"
     }
