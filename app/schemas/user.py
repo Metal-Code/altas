@@ -1,6 +1,9 @@
 from pydantic import BaseModel, EmailStr, ConfigDict
 from datetime import datetime, date
 from typing import Optional
+import uuid as uuid_module
+from sqlalchemy import UUID
+import uuid
 
 class UserCreate(BaseModel):
     name : str
@@ -17,7 +20,7 @@ class UserLogin(BaseModel):
     password : str
 
 class UserResponse(BaseModel):
-    id : int
+    public_id: uuid_module.UUID
     name : str
     email : EmailStr
     dob : date

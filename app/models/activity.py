@@ -2,6 +2,8 @@ from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import String, func, ForeignKey
 from datetime import datetime, date
 from app.core.database import Base
+import uuid as uuid_module
+from sqlalchemy import UUID
 
 class Activity(Base):
     __tablename__ = "activities"

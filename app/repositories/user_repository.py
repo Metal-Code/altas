@@ -4,6 +4,8 @@ from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.user import User
 from datetime import date, datetime
+import uuid as uuid_module
+import uuid
 
 async def get_user_by_email(db : AsyncSession, email : str) -> User | None:
     result = await db.execute(select(User).where(User.email == email))
@@ -19,3 +21,7 @@ async def create_user(db: AsyncSession, name: str, email: str, hashed_password: 
     await db.commit()
     await db.refresh(user)
     return user
+
+async def get_user_by_public_id(db: AsyncSession, public_id: uuid_module.UUID) -> User | None:
+    result = await db.execute(select(User).where(User.public_id == public_id))
+    return result.scalar_one_or_none()

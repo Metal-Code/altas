@@ -8,10 +8,12 @@ from app.schemas.participant import ParticipantCreate, ParticipantResponse
 from app.models.participant import Participant
 from app.core.database import get_db
 from app.api.deps import get_current_user
+from app.core.limiter import limiter
 
 router = APIRouter(prefix="/activity", tags=["Activity"])
 
 @router.post("/", response_model=ActivityResponse)
+@limiter.limit("10/minute")
 async def create_activity(activity_data : ActivityCreate, current_user : User = Depends(get_current_user), db : AsyncSession = Depends(get_db)):
     return await create_activity_service(db, activity_data, current_user)
 
@@ -22,6 +24,7 @@ async def get_activities(location : str | None = None, db : AsyncSession = Depen
 
 
 @router.post("/{activity_id}/join", response_model=ParticipantResponse)
+@limiter.limit("10/minute")
 async def join_activity(activity_id : int, current_user : User = Depends(get_current_user), db : AsyncSession = Depends(get_db)) -> Participant:
     return await join_activity_service(db, activity_id, current_user)
 
