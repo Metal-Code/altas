@@ -41,3 +41,7 @@ async def update_activity(db : AsyncSession, activity, data : ActivityUpdate):
 async def delete_activity(db : AsyncSession, activity):
     await db.delete(activity)
     await db.commit()
+
+async def get_activity_by_public_id(db: AsyncSession, public_id: uuid.UUID) -> Activity | None:
+    result = await db.execute(select(Activity).where(Activity.public_id == public_id))
+    return result.scalar_one_or_none()

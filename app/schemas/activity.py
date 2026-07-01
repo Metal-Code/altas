@@ -1,6 +1,8 @@
 from pydantic import BaseModel, EmailStr, ConfigDict
 from datetime import datetime
 from typing import Optional
+import uuid
+
 
 
 class ActivityCreate(BaseModel):
@@ -12,7 +14,7 @@ class ActivityCreate(BaseModel):
     category : str
 
 class ActivityResponse(BaseModel):
-    id : int
+    public_id: uuid.UUID
     creator_id : int
     created_at : datetime
     title : str

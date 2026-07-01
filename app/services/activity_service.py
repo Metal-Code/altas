@@ -1,17 +1,18 @@
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.repositories.activity_repository import (
-    get_activity_by_id, 
+from app.repositories.activity_repository import ( 
     get_all_activities as repo_get_all_activities, 
     update_activity as repo_update_activity, 
     delete_activity as repo_delete_activity, 
-    create_activity as repo_create_activity
+    create_activity as repo_create_activity,
+    get_activity_by_public_id as repo_get_activity_by_public_id
     )
 from app.schemas.user import UserCreate
 from app.models.user import User
 from datetime import datetime, date
 from app.core.config import settings
 from app.schemas.activity import ActivityCreate, ActivityUpdate, ActivityResponse
+import uuid
 
 async def create_activity_service(db : AsyncSession, activity_data : ActivityCreate, current_user : User):
     created_activity = await repo_create_activity(
@@ -26,8 +27,8 @@ async def create_activity_service(db : AsyncSession, activity_data : ActivityCre
     )
     return created_activity
 
-async def update_activity_service(db : AsyncSession, activity_id : int, activity_data : ActivityUpdate, current_user : User):
-    activity = await get_activity_by_id(db, activity_id)
+async def update_activity_service(db : AsyncSession, activity_id : uuid.UUID, activity_data : ActivityUpdate, current_user : User):
+    activity = await repo_get_activity_by_public_id(db, activity_id)
     if not activity:
         raise HTTPException(status_code=404, detail="Activity not found!!!")
     if activity.creator_id != current_user.id:
@@ -36,8 +37,8 @@ async def update_activity_service(db : AsyncSession, activity_id : int, activity
     return await repo_update_activity(db, activity, activity_data)
 
 
-async def delete_activity_service(db : AsyncSession, activity_id : int, current_user : User):
-    activity = await get_activity_by_id(db, activity_id)
+async def delete_activity_service(db : AsyncSession, activity_id : uuid.UUID, current_user : User):
+    activity = await repo_get_activity_by_public_id(db, activity_id)
     if not activity:
         raise HTTPException(status_code=404, detail="Activity not found")
     if activity.creator_id != current_user.id:
@@ -49,8 +50,8 @@ async def delete_activity_service(db : AsyncSession, activity_id : int, current_
     }
 
 
-async def get_activity_service(db : AsyncSession, activity_id : int):
-    activity = await get_activity_by_id(db, activity_id)
+async def get_activity_service(db : AsyncSession, activity_id : uuid.UUID):
+    activity = await repo_get_activity_by_public_id(db, activity_id)
     if not activity:
         raise HTTPException(status_code=404, detail="Activity not found")
     return activity

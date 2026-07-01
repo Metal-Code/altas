@@ -9,6 +9,7 @@ class Activity(Base):
     __tablename__ = "activities"
     
     id : Mapped[int] = mapped_column(primary_key=True)
+    public_id: Mapped[uuid_module.UUID] = mapped_column(UUID(as_uuid=True), default=uuid_module.uuid4, unique=True, index=True)
     creator_id : Mapped[int] = mapped_column(ForeignKey("users.id"))
     title : Mapped[str] = mapped_column(String(100), nullable=False)
     description : Mapped[str | None] = mapped_column(String(800), nullable=True)
